@@ -35,30 +35,37 @@ my_color = "#" + ''.join([hex(i)[2:].zfill(2) for i in lerped_color])
 #Color for breathe effect ... brighter version of main color
 emph_color = "#" + ''.join([hex(i)[2:].zfill(2) for i in highlight_color])
 
-###First, set the light color
-#Build the default/common parts of the payload
+###########################
+#First, set the light color
+
+#Build the payload
 payload = {
-    'power' : 'on',
-    'color' : my_color,
+    'power'    : 'on',
+    'color'    : my_color,
     'duration' : 5,
 }
 
+#Send it, and check results
 response = requests.put('https://api.lifx.com/v1/lights/all/state', params=payload, headers=headers)
 response.raise_for_status()
 
-####Next, if it is a big change, do the breathe effect
+###########################
+#If it is a big change, do the breathe effect
 if abs(pct_change) > 2*DAILY_STD_DEV:
-    breathe_rate = min(max(abs(2/(pct_change/DAILY_STD_DEV)), 1), 7)
+    #The bigger the change, the faster the breathe effect. But keep it
+    # between 1 and 8 cycles per second
+    breathe_rate = min(max(abs(2/(pct_change/DAILY_STD_DEV)), 1), 8)
 
-    #Build the default/common parts of the payload
+    #Build the payload
     payload = {
-        'power_on' : 'true',
+        'power_on'   : 'true', #Light should already be on, but just in case.
         'from_color' : my_color,
-        'color' : emph_color,
-        'period' : breathe_rate,
-        'cycles' : (1/breathe_rate)*CALL_FREQUENCY*60,
-        'persist' : 'true'
+        'color'      : emph_color,
+        'period'     : breathe_rate,
+        'cycles'     : (1/breathe_rate)*CALL_FREQUENCY*60, #Repeat until the next script call
+        'persist'    : 'true'
     }
 
+    #Send message and check response
     response = requests.post('https://api.lifx.com/v1/lights/all/effects/breathe', params=payload, headers=headers)
     response.raise_for_status()
