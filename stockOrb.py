@@ -1,15 +1,18 @@
 import requests
-import json
 from yahoo_finance import Share
 
-#Some constants
-std_dev_change = 1.0
-two_std_dev_change = 2*std_dev_change
+######################
+#Configuration constants
+DAILY_STD_DEV = 1.0 #In percent, what is the standard deviation of stock price change?
+CALL_FREQUENCY = 5 #How often this script will be called, in minutes
+STOCK_TO_TRACK = '^gspc'
 
+######################
 #Get the share price and open, calculate percent change from open
-gspc = Share('^gspc')
-pct_change = 100 * (float(gspc.get_price()) - float(gspc.get_open()))/float(gspc.get_open())
+stock = Share(STOCK_TO_TRACK)
+pct_change = 100 * (float(stock.get_price()) - float(stock.get_open()))/float(stock.get_open())
 
+######################
 #Set up the auth header
 f = open('token.txt', 'r')
 token = f.readline()
@@ -18,8 +21,8 @@ headers = {
 }
 
 #Calculate color from pct_change
-how_green = min(max(1.0 + (pct_change/two_std_dev_change), 0), 1.0)
-how_red = min(max(1.0 - (pct_change/two_std_dev_change), 0), 1.0)
+how_green = min(max(1.0 + (pct_change/(2*DAILY_STD_DEV)), 0), 1.0)
+how_red = min(max(1.0 - (pct_change/(2*DAILY_STD_DEV)), 0), 1.0)
 green = int(255.999*how_green)
 red = int(255.999*how_red)
 
@@ -40,8 +43,8 @@ payload = {
 response = requests.put('https://api.lifx.com/v1/lights/all/state', params=payload, headers=headers)
 
 ####Next, if it is a big change, do the breathe effect
-if abs(pct_change) > 2*std_dev_change:
-    breathe_rate = 2/(pct_change/std_dev_change)
+if abs(pct_change) > 2*DAILY_STD_DEV:
+    breathe_rate = 2/(pct_change/DAILY_STD_DEV)
     print breathe_rate
 
     #Build the default/common parts of the payload
@@ -50,7 +53,7 @@ if abs(pct_change) > 2*std_dev_change:
         'from_color' : my_color,
         'color' : emph_color,
         'period' : breathe_rate,
-        'cycles' : breathe_rate*15*60,
+        'cycles' : breathe_rate*CALL_FREQUENCY*60,
         'persist' : 'true'
     }
 
