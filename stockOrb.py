@@ -41,11 +41,11 @@ payload = {
 }
 
 response = requests.put('https://api.lifx.com/v1/lights/all/state', params=payload, headers=headers)
+response.raise_for_status()
 
 ####Next, if it is a big change, do the breathe effect
 if abs(pct_change) > 2*DAILY_STD_DEV:
     breathe_rate = 2/(pct_change/DAILY_STD_DEV)
-    print breathe_rate
 
     #Build the default/common parts of the payload
     payload = {
@@ -58,4 +58,4 @@ if abs(pct_change) > 2*DAILY_STD_DEV:
     }
 
     response = requests.post('https://api.lifx.com/v1/lights/all/effects/breathe', params=payload, headers=headers)
-    print response.text
+    response.raise_for_status()
