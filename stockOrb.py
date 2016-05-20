@@ -3,7 +3,7 @@ from yahoo_finance import Share
 
 ######################
 #Configuration constants
-DAILY_STD_DEV  = 1.0               #In %, what is the standard deviation of stock price change?
+DAILY_STD_DEV  = 1.250             #In %, what is the standard deviation of stock price change?
 CALL_FREQUENCY = 5                 #How often this script will be called, in minutes
 STOCK_TO_TRACK = '^gspc'           #Which stock to track. Note that you cannot do DJI due to
                                    # limitations in Yahoo's agreement with Dow Jones
@@ -14,6 +14,11 @@ SELECTOR       = "label:Stock Orb" #Which light to use
 ######################
 #Get the share price and open, calculate percent change from open
 stock = Share(STOCK_TO_TRACK)
+
+#Just in case stock access failed
+if(float(stock.get_open()) == 0):
+    sys.exit()
+
 pct_change = 100 * (float(stock.get_price()) - float(stock.get_open()))/float(stock.get_open())
 
 ######################
