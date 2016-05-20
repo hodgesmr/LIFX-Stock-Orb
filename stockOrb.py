@@ -3,11 +3,13 @@ from yahoo_finance import Share
 
 ######################
 #Configuration constants
-DAILY_STD_DEV = 1.0 #In percent, what is the standard deviation of stock price change?
-CALL_FREQUENCY = 5 #How often this script will be called, in minutes
-STOCK_TO_TRACK = '^gspc'
-GOOD_COLOR = [0, 255, 0]
-BAD_COLOR = [255, 0, 0]
+DAILY_STD_DEV  = 1.0               #In %, what is the standard deviation of stock price change?
+CALL_FREQUENCY = 5                 #How often this script will be called, in minutes
+STOCK_TO_TRACK = '^gspc'           #Which stock to track. Note that you cannot do DJI due to
+                                   # limitations in Yahoo's agreement with Dow Jones
+GOOD_COLOR     = [0, 255, 0]       #Default is green
+BAD_COLOR      = [255, 0, 0]       #Default is red
+SELECTOR       = "label:Stock Orb" #Which light to use
 
 ######################
 #Get the share price and open, calculate percent change from open
@@ -46,7 +48,7 @@ payload = {
 }
 
 #Send it, and check results
-response = requests.put('https://api.lifx.com/v1/lights/all/state', params=payload, headers=headers)
+response = requests.put("https://api.lifx.com/v1/lights/" + SELECTOR + "/state", params=payload, headers=headers)
 response.raise_for_status()
 
 ###########################
@@ -67,5 +69,5 @@ if abs(pct_change) > 2*DAILY_STD_DEV:
     }
 
     #Send message and check response
-    response = requests.post('https://api.lifx.com/v1/lights/all/effects/breathe', params=payload, headers=headers)
+    response = requests.post("https://api.lifx.com/v1/lights/" + SELECTOR + "/effects/breathe", params=payload, headers=headers)
     response.raise_for_status()

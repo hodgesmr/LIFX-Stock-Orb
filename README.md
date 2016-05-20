@@ -16,4 +16,6 @@ for this script to be fired once every fifteen minutes via a cron job (or simila
 
 1. Use https://cloud.lifx.com/settings to create an authorization token. Put this token in a file called token.txt.
 2. Check the "Configuration constants" at the top of the script, and modify them if desired.
-3. Set up some process on your machine to call the script at a rate that matches the CALL_FREQUENCY variable (default is 5 minutes)
+3. In the LIFX app or web site, name your bulb "Stock Orb". Or you may modify the SELECTOR
+variable.
+4. Set up some process on your machine to call the script at a rate that matches the CALL_FREQUENCY variable (default is 5 minutes)
